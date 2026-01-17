@@ -8,14 +8,19 @@ Click any element, leave a note, and export everything—selector, styles, anima
 
 - **Element picker** - Click any element on localhost to select it
 - **Quick annotations** - Add notes like "make this snappier" or "too much padding"
-- **Context capture** - Automatically captures selector, styles, animations, and position
+- **Context capture** - Automatically captures:
+  - CSS selector
+  - Computed styles
+  - Animation state (name, duration, play state)
+  - Element position and dimensions
 - **Prompt generation** - Export all annotations as a formatted prompt for AI agents
-- **History** - View and re-copy past generated prompts (last 50)
+- **History** - View and re-copy past generated prompts (last 50, filterable by URL)
+- **Badge indicators** - Shows "ON" when picker is active, annotation count when saved
 
 ## Tech Stack
 
 - TypeScript
-- React
+- React 19
 - Vite
 - Chrome Extension Manifest V3
 
@@ -84,18 +89,21 @@ Then reload the extension in Chrome after changes.
 
 ```
 pinpoint/
+├── dist/                    # Built extension (load this in Chrome)
 ├── public/
-│   ├── manifest.json
-│   └── icons/
+│   ├── manifest.json        # Chrome Extension Manifest V3
+│   └── icons/               # Extension icons (16, 48, 128px)
 ├── src/
-│   ├── background/        # Service worker
-│   ├── content/           # Content script (React overlay)
-│   │   ├── components/
-│   │   └── hooks/
-│   ├── popup/             # Extension popup (React)
-│   ├── types/             # TypeScript types
-│   └── utils/             # Shared utilities
-└── vite.config.ts
+│   ├── background/          # Service worker for message handling
+│   ├── content/             # Element picker, annotation form (React)
+│   │   ├── components/      # ElementPicker, AnnotationForm, AnnotationList
+│   │   └── hooks/           # useElementCapture hook
+│   ├── popup/               # Main popup UI, history view (React)
+│   ├── types/               # TypeScript type definitions
+│   └── utils/               # Selector, context capture, storage, history, prompt generator
+├── vite.config.ts           # Vite build configuration
+├── package.json             # Dependencies and scripts
+└── README.md                # Complete documentation
 ```
 
 ## License
