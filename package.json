@@ -1,0 +1,33 @@
+{
+  "name": "pinpoint",
+  "version": "0.1.0",
+  "description": "Browser extension to annotate your local dev UI and export context-rich feedback for AI agents.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "vite build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/remigiuszswiatkowski/pinpoint.git"
+  },
+  "keywords": ["chrome-extension", "ai", "annotations", "developer-tools"],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/remigiuszswiatkowski/pinpoint/issues"
+  },
+  "homepage": "https://github.com/remigiuszswiatkowski/pinpoint#readme",
+  "dependencies": {
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.1.33",
+    "@types/react": "^19.2.8",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.2",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1"
+  }
+}

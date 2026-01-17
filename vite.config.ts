@@ -1,0 +1,79 @@
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { resolve } from 'path';
+import { mkdirSync, existsSync, readFileSync, writeFileSync, copyFileSync, rmSync } from 'fs';
+
+export default defineConfig({
+  plugins: [
+    react(),
+    {
+      name: 'fix-extension-paths',
+      closeBundle() {
+        const distDir = resolve(__dirname, 'dist');
+
+        // Copy and fix popup HTML paths
+        const srcHtml = resolve(distDir, 'src/popup/index.html');
+        const destDir = resolve(distDir, 'popup');
+        const destHtml = resolve(destDir, 'index.html');
+
+        if (existsSync(srcHtml)) {
+          if (!existsSync(destDir)) {
+            mkdirSync(destDir, { recursive: true });
+          }
+
+          let html = readFileSync(srcHtml, 'utf-8');
+          html = html.replace(/src="[^"]*\/popup\.js"/g, 'src="./popup.js"');
+          html = html.replace(/href="[^"]*\/chunks\//g, 'href="../chunks/');
+          html = html.replace(/src="[^"]*\/chunks\//g, 'src="../chunks/');
+          html = html.replace(/href="[^"]*popup\.css"/g, 'href="./styles/popup.css"');
+          writeFileSync(destHtml, html);
+        }
+
+        // Copy content CSS to correct location
+        const contentStylesDir = resolve(distDir, 'content/styles');
+        if (!existsSync(contentStylesDir)) {
+          mkdirSync(contentStylesDir, { recursive: true });
+        }
+
+        const srcContentCss = resolve(__dirname, 'src/content/styles/content.css');
+        const destContentCss = resolve(contentStylesDir, 'content.css');
+        if (existsSync(srcContentCss)) {
+          copyFileSync(srcContentCss, destContentCss);
+        }
+
+        // Clean up leftover src folder
+        const srcFolder = resolve(distDir, 'src');
+        if (existsSync(srcFolder)) {
+          rmSync(srcFolder, { recursive: true });
+        }
+      }
+    }
+  ],
+  base: '',
+  build: {
+    outDir: 'dist',
+    emptyDirFirst: true,
+    rollupOptions: {
+      input: {
+        popup: resolve(__dirname, 'src/popup/index.html'),
+        content: resolve(__dirname, 'src/content/index.tsx'),
+        background: resolve(__dirname, 'src/background/service-worker.ts'),
+      },
+      output: {
+        entryFileNames: (chunkInfo) => {
+          if (chunkInfo.name === 'content') return 'content/index.js';
+          if (chunkInfo.name === 'background') return 'background/service-worker.js';
+          return 'popup/[name].js';
+        },
+        chunkFileNames: 'chunks/[name]-[hash].js',
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name?.endsWith('.css')) {
+            return 'popup/styles/popup.css';
+          }
+          return 'assets/[name]-[hash][extname]';
+        },
+      },
+    },
+  },
+  publicDir: 'public',
+});
