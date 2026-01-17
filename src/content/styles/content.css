@@ -1,0 +1,15 @@
+/*
+ * Content script styles
+ * Note: Most styles are injected via Shadow DOM in index.tsx
+ * This file is for global styles that need to affect the host page
+ */
+
+.pinpoint-highlight {
+  outline: 2px dashed #666 !important;
+  outline-offset: 2px;
+}
+
+.pinpoint-selected {
+  outline: 2px solid #000 !important;
+  outline-offset: 2px;
+}
