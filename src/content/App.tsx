@@ -13,7 +13,9 @@ export default function App() {
   // Listen for messages from background/popup
   useEffect(() => {
     const handleMessage = (message: MessageType) => {
+      console.log('[Pinpoint] Received message:', message);
       if (message.type === 'PICKER_STATE') {
+        console.log('[Pinpoint] Setting picker active:', message.payload.active);
         setPickerActive(message.payload.active);
         if (!message.payload.active) {
           setSelectedElement(null);
@@ -42,6 +44,7 @@ export default function App() {
   }, []);
 
   const handleElementSelect = useCallback((element: HTMLElement, context: ElementContext) => {
+    console.log('[Pinpoint] Element selected:', element, context);
     setSelectedElement(element);
     setSelectedContext(context);
   }, []);

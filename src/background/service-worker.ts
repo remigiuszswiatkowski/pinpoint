@@ -29,16 +29,19 @@ async function handleMessage(
       const newState = !currentState;
       await setPickerState(newState);
 
+      // Get tab ID from message (sent by popup) or from sender (sent by content script)
+      const tabId = (message as { tabId?: number }).tabId || sender.tab?.id;
+
       // Notify content script
-      if (sender.tab?.id) {
-        chrome.tabs.sendMessage(sender.tab.id, {
+      if (tabId) {
+        chrome.tabs.sendMessage(tabId, {
           type: 'PICKER_STATE',
           payload: { active: newState },
         });
       }
 
       // Update badge
-      await updateBadge(sender.tab?.id, newState);
+      await updateBadge(tabId, newState);
 
       return { active: newState };
     }

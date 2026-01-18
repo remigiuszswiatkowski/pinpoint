@@ -34,12 +34,16 @@ export function Popup() {
   const handleTogglePicker = useCallback(async () => {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (tab?.id) {
-      const response = await chrome.tabs.sendMessage(tab.id, { type: 'TOGGLE_PICKER' });
-      // Note: Response comes back differently, we need to handle via background
-      chrome.runtime.sendMessage({ type: 'TOGGLE_PICKER' });
-      setPickerActive(!pickerActive);
+      // Send to background with tab ID so it can notify the content script
+      const response = await chrome.runtime.sendMessage({
+        type: 'TOGGLE_PICKER',
+        tabId: tab.id
+      });
+      if (response?.active !== undefined) {
+        setPickerActive(response.active);
+      }
     }
-  }, [pickerActive]);
+  }, []);
 
   const handleExport = useCallback(async () => {
     setError(null);

@@ -33,6 +33,7 @@ export function ElementPicker({ onSelect }: ElementPickerProps) {
 
   const handleClick = useCallback((e: MouseEvent) => {
     const target = e.target as HTMLElement;
+    console.log('[Pinpoint] Click detected on:', target);
 
     // Ignore our own UI elements
     if (target.closest('#pinpoint-root')) return;
@@ -45,7 +46,9 @@ export function ElementPicker({ onSelect }: ElementPickerProps) {
     hoveredElementRef.current = null;
 
     // Capture context and notify parent
+    console.log('[Pinpoint] Capturing context...');
     const context = capture(target);
+    console.log('[Pinpoint] Context captured:', context);
     onSelect(target, context);
   }, [capture, onSelect]);
 
@@ -60,6 +63,8 @@ export function ElementPicker({ onSelect }: ElementPickerProps) {
   }, []);
 
   useEffect(() => {
+    console.log('[Pinpoint] ElementPicker mounted - adding event listeners');
+
     // Add event listeners
     document.addEventListener('mouseover', handleMouseOver, true);
     document.addEventListener('mouseout', handleMouseOut, true);
