@@ -1,6 +1,8 @@
-import React, { useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useCallback, useRef, useState } from 'react';
 import type { ElementContext } from '../../types';
 import { useElementCapture } from '../hooks/useElementCapture';
+import { pauseAllAnimations, resumeAllAnimations } from '../../utils/animation-control';
+import { PauseIndicator } from './PauseIndicator';
 
 interface ElementPickerProps {
   onSelect: (element: HTMLElement, context: ElementContext) => void;
@@ -9,6 +11,7 @@ interface ElementPickerProps {
 export function ElementPicker({ onSelect }: ElementPickerProps) {
   const { capture } = useElementCapture();
   const hoveredElementRef = useRef<HTMLElement | null>(null);
+  const [animationsPaused, setAnimationsPaused] = useState(false);
 
   const handleMouseOver = useCallback((e: MouseEvent) => {
     const target = e.target as HTMLElement;
@@ -60,6 +63,20 @@ export function ElementPicker({ onSelect }: ElementPickerProps) {
         hoveredElementRef.current = null;
       }
     }
+
+    // Space to toggle animation pause
+    if (e.key === ' ' || e.code === 'Space') {
+      e.preventDefault();
+      setAnimationsPaused(prev => {
+        if (prev) {
+          resumeAllAnimations();
+          return false;
+        } else {
+          pauseAllAnimations();
+          return true;
+        }
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -88,9 +105,12 @@ export function ElementPicker({ onSelect }: ElementPickerProps) {
       if (hoveredElementRef.current) {
         hoveredElementRef.current.classList.remove('pinpoint-highlight');
       }
+
+      // Resume animations if paused
+      resumeAllAnimations();
     };
   }, [handleMouseOver, handleMouseOut, handleClick, handleKeyDown]);
 
-  // This component doesn't render anything visible
-  return null;
+  // Render pause indicator when animations are paused
+  return animationsPaused ? <PauseIndicator /> : null;
 }

@@ -177,6 +177,22 @@ styleSheet.textContent = `
   .pinpoint-annotation-delete:hover {
     color: #333;
   }
+
+  .pinpoint-pause-indicator {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #000;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 2147483647;
+    pointer-events: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
 `;
 shadowRoot.appendChild(styleSheet);
 
