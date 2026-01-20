@@ -29,6 +29,25 @@ const RELEVANT_STYLES = [
 ];
 
 /**
+ * Utility classes to skip when creating simplified selectors
+ */
+const UTILITY_CLASS_PATTERNS = [
+  /^(flex|grid|block|inline|hidden)$/,
+  /^(m|p|mt|mr|mb|ml|mx|my|pt|pr|pb|pl|px|py)-/,
+  /^(w|h|min-w|min-h|max-w|max-h)-/,
+  /^(text|font|leading|tracking)-/,
+  /^(bg|border|rounded|shadow)-/,
+  /^(absolute|relative|fixed|sticky)$/,
+  /^(top|right|bottom|left)-/,
+  /^(z)-/,
+  /^(gap|space)-/,
+  /^(items|justify|content|self)-/,
+  /^(overflow|cursor|pointer-events)-/,
+  /^(opacity|transition|transform|animate)-/,
+  /^(sm|md|lg|xl|2xl):/,
+];
+
+/**
  * Capture full context for an element
  */
 export function captureElementContext(element: HTMLElement): ElementContext {
@@ -60,11 +79,16 @@ export function captureElementContext(element: HTMLElement): ElementContext {
   return {
     selector: getUniqueSelector(element),
     tagName: element.tagName.toLowerCase(),
+    componentName: getReactComponentName(element) || getSimplifiedSelector(element),
     rect: {
       top: rect.top,
       left: rect.left,
       width: rect.width,
       height: rect.height,
+    },
+    viewport: {
+      width: window.innerWidth,
+      height: window.innerHeight,
     },
     styles,
     animations,
@@ -90,4 +114,63 @@ function captureAnimations(element: HTMLElement): AnimationInfo[] {
       playState: anim.playState,
     };
   });
+}
+
+/**
+ * Extract React component name from element's fiber data
+ */
+function getReactComponentName(element: HTMLElement): string | null {
+  // React 16+ stores fiber in __reactFiber$ or __reactInternalInstance$ prefixed keys
+  const fiberKey = Object.keys(element).find(key =>
+    key.startsWith('__reactFiber$') || key.startsWith('__reactInternalInstance$')
+  );
+
+  if (!fiberKey) return null;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const fiber = (element as any)[fiberKey];
+
+  // Walk up fiber tree to find a named component (skip DOM elements like 'div', 'span')
+  let current = fiber;
+  while (current) {
+    const type = current.type;
+    if (type && typeof type !== 'string') {
+      const name = type.displayName || type.name;
+      if (name && !name.startsWith('_')) {
+        return name;
+      }
+    }
+    current = current.return;
+  }
+
+  return null;
+}
+
+/**
+ * Check if a class name is a utility class (Tailwind, etc.)
+ */
+function isUtilityClass(className: string): boolean {
+  return UTILITY_CLASS_PATTERNS.some(pattern => pattern.test(className));
+}
+
+/**
+ * Create a simplified selector for the element
+ */
+function getSimplifiedSelector(element: HTMLElement): string {
+  const tag = element.tagName.toLowerCase();
+
+  // Check for id first
+  if (element.id) {
+    return `${tag}#${element.id}`;
+  }
+
+  // Find the most meaningful class (skip utility classes)
+  const meaningfulClass = Array.from(element.classList).find(c => !isUtilityClass(c));
+
+  if (meaningfulClass) {
+    return `${tag}.${meaningfulClass}`;
+  }
+
+  // Fall back to tag name
+  return tag;
 }

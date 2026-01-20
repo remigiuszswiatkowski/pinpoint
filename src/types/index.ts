@@ -1,9 +1,14 @@
 export interface ElementContext {
   selector: string;
   tagName: string;
+  componentName?: string;
   rect: {
     top: number;
     left: number;
+    width: number;
+    height: number;
+  };
+  viewport: {
     width: number;
     height: number;
   };
