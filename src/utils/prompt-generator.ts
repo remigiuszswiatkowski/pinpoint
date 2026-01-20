@@ -31,45 +31,34 @@ function formatAnnotation(annotation: Annotation, index: number): string {
 
   lines.push(`### Annotation ${index}`);
   lines.push('');
-  lines.push(`**Note:** "${note}"`);
+
+  // Element - component name or simplified selector
+  lines.push(`**Element:** ${context.componentName || context.tagName}`);
+
+  // Position as percentage of viewport
+  const posX = Math.round((context.rect.left / context.viewport.width) * 100);
+  const posY = Math.round((context.rect.top / context.viewport.height) * 100);
+  lines.push(`**Position:** ${posX}%, ${posY}%`);
+
+  // Feedback (renamed from Note)
+  lines.push(`**Feedback:** ${note}`);
+
   lines.push('');
-  lines.push(`**Element:** \`${context.selector}\``);
 
-  // Add relevant styles
-  const styleEntries = Object.entries(context.styles);
-  if (styleEntries.length > 0) {
-    const styleStr = styleEntries
-      .slice(0, 6) // Limit to most important
-      .map(([key, value]) => `${formatStyleKey(key)}: ${value}`)
-      .join(', ');
-    lines.push(`**Styles:** ${styleStr}`);
-  }
+  // Guidelines section
+  lines.push('**Guidelines:**');
+  lines.push('- preserve existing interaction patterns');
+  lines.push('- maintain current animation logic unless specified');
+  lines.push('- keep accessibility (aria labels, keyboard nav)');
 
-  // Add animation info if present
-  if (context.animations.length > 0) {
-    const anim = context.animations[0];
-    const progress = anim.currentTime && anim.duration
-      ? Math.round((anim.currentTime / anim.duration) * 100)
-      : null;
+  lines.push('');
 
-    lines.push(
-      `**Animation:** ${anim.name}${progress !== null ? ` at ${progress}%` : ''} (${anim.duration}ms, ${anim.playState})`
-    );
-  }
-
-  // Add position info
-  lines.push(
-    `**Position:** ${Math.round(context.rect.width)}x${Math.round(context.rect.height)} at (${Math.round(context.rect.left)}, ${Math.round(context.rect.top)})`
-  );
+  // Constraints section
+  lines.push('**Constraints:**');
+  lines.push('- mobile viewport must work');
+  lines.push('- loading states must remain intact');
 
   return lines.join('\n');
-}
-
-/**
- * Convert camelCase to kebab-case for display
- */
-function formatStyleKey(key: string): string {
-  return key.replace(/([A-Z])/g, '-$1').toLowerCase();
 }
 
 /**
